@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const mongoose = require('../../database/index.js');
 
-const CardPack = require('../../database/models/CardPack');
+const CardPack = require('../../database/models/CardPack.js');
 
 // Import functions to use googleAPI
 const {getSheetId, getSheetName, getNumberOfQuestions, checkLinkValid} = require('../../utility/spreadsheets.js');
@@ -18,7 +18,7 @@ async function getSheetsInfo(interaction) {
 async function addRecordToDb(interaction) {
     const {sheetId, sheetName, numberOfQuestions} = await getSheetsInfo(interaction);
     const newCard = new CardPack({
-        discordId: interaction.user.id,
+        userInfo: { discordId: `${interaction.user.id}`, discordTag: `${interaction.user.tag}` },
         nameOfPack: sheetName,
         googleSheetsId: sheetId,
         numOfQuestions: numberOfQuestions,
@@ -29,10 +29,10 @@ async function addRecordToDb(interaction) {
 }
 
 module.exports = {
-    cooldown: 5,
+    cooldown: 30,
     data: new SlashCommandBuilder()
-        .setName('add_record')
-        .setDescription('Add record to database')
+        .setName('add_quiz')
+        .setDescription('Add quiz to database')
         //.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addStringOption(option =>
             option

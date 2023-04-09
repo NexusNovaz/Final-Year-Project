@@ -39,7 +39,6 @@ function getNumberOfQuestions(spreadsheetId) {
             if (err) return -1;
             
             const rows = res.data.values;
-            const spreadsheetName = res.data;
 
             if (rows.length) {
             
@@ -66,4 +65,35 @@ function checkLinkValid(interaction) {
     return test;
 }
 
-module.exports = {getSheetId, getSheetName, getNumberOfQuestions, checkLinkValid};
+async function getQuizQuestions(spreadsheetId) {
+    const sheets = google.sheets({
+      version: 'v4',
+      auth: googleAPIKey
+    });
+  
+    const range = "Sheet1!A1:A51";
+  
+    return new Promise((resolve, reject) => {
+      sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range
+      }, (err, res) => {
+        if (err) {
+          console.error(`[ERROR] ${err}`);
+          reject(err);
+        }
+  
+        const rows = res.data.values;
+  
+        if (rows.length) {
+          resolve(rows);
+        } else {
+          console.log('No data found.');
+          reject(new Error('No data found.'));
+        }
+      });
+    });
+  }
+  
+
+module.exports = {getSheetId, getSheetName, getNumberOfQuestions, checkLinkValid, getQuizQuestions};

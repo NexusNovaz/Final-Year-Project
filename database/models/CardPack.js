@@ -2,7 +2,10 @@ const { Schema } = require('mongoose');
 const mongoose = require('../../database')
 
 const cardpackSchema = new Schema({
-  discordId: String,
+  userInfo: {
+    discordId: String,
+    discordTag: String
+  },
   nameOfPack: String,
   googleSheetsId: String,
   numOfQuestions: Number,

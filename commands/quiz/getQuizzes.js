@@ -1,6 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder, Client} = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder} = require('discord.js');
 const mongoose = require('../../database/index.js');
 const CardPack = require('../../database/models/CardPack.js');
+const discord_token = token = require('../../config.json')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,15 +10,14 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
         try {
-            const quizzes = await CardPack.find({}, { discordId: 1, nameOfPack: 1, googleSheetsId: 1, _id: 0 });
-            const client = new Client();
+            const quizzes = await CardPack.find({}, { userInfo: 1, nameOfPack: 1, googleSheetsId: 1, _id: 0 });
             const foundQuizzesEmbed = new EmbedBuilder()
             .setColor(0x14cf03)
             .setTitle("List of Quizzes")
             .setDescription("Heres a list of quizzes I was able to find:");
             for (const quiz of quizzes) {
                 foundQuizzesEmbed.addFields(
-                    { name: `${quiz.nameOfPack} by ${(await client.users.fetch(quiz.discordId)).tag}`, value: `${quiz.googleSheetsId}`, inline: false }
+                    { name: `${quiz.nameOfPack} by ${quiz.userInfo.discordTag}`, value: `${quiz.googleSheetsId}`, inline: false }
                 );
             }
             await interaction.editReply({ embeds: [foundQuizzesEmbed] });

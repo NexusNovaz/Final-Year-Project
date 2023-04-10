@@ -1,99 +1,107 @@
-const { ModalSubmitFields } = require('discord.js');
-const {googleAPIKey} = require('../config.json');
-const { google } = require('googleapis');
+const { ModalSubmitFields } = require("discord.js");
+const { googleAPIKey } = require("../config.json");
+const { google } = require("googleapis");
 
 async function getSheetId(interaction) {
-    const regex = /\/d\/([a-zA-Z0-9-_]+)\//;
-    const link = interaction.options.getString('link');
-    const match = link.match(regex);
-    const spreadsheetId = match[1];
-    return spreadsheetId;
+  const regex = /\/d\/([a-zA-Z0-9-_]+)\//;
+  const link = interaction.options.getString("link");
+  const match = link.match(regex);
+  const spreadsheetId = match[1];
+  return spreadsheetId;
 }
 
 async function getSheetName(spreadsheetId) {
-    const sheets = google.sheets({
-        version: 'v4',
-        auth: googleAPIKey
-    });
+  const sheets = google.sheets({
+    version: "v4",
+    auth: googleAPIKey,
+  });
 
-    const response = await sheets.spreadsheets.get({
-        spreadsheetId,
-        includeGridData: false,
-    });
+  const response = await sheets.spreadsheets.get({
+    spreadsheetId,
+    includeGridData: false,
+  });
 
-    return response.data.properties.title;
+  return response.data.properties.title;
 }
 
 function getNumberOfQuestions(spreadsheetId) {
-    const sheets = google.sheets({
-        version: 'v4',
-        auth: googleAPIKey
-    });
+  const sheets = google.sheets({
+    version: "v4",
+    auth: googleAPIKey,
+  });
 
-    const range = "Sheet1!A1:F51"
-    try {
-        sheets.spreadsheets.values.get({
-            spreadsheetId,
-            range
-        }, (err, res) => {
-            if (err) return -1;
-            
-            const rows = res.data.values;
+  const range = "Sheet1!A1:F51";
+  try {
+    sheets.spreadsheets.values.get(
+      {
+        spreadsheetId,
+        range,
+      },
+      (err, res) => {
+        if (err) return -1;
 
-            if (rows.length) {
-            
-                return rows.length;
-            
-            } else {
-                
-                console.log('No data found.');
-                return -2;
-            
-            }
-        });
-    } catch (err) {
-        console.error(`[ERROR] ${err}`);
-        return -1;
-    }
+        const rows = res.data.values;
+
+        if (rows.length) {
+          return rows.length;
+        } else {
+          console.log("No data found.");
+          return -2;
+        }
+      }
+    );
+  } catch (err) {
+    console.error(`[ERROR] ${err}`);
+    return -1;
+  }
 }
 
 function checkLinkValid(interaction) {
-    if (interaction.user.id == 153284216228937728) return true; // Check if Nexus Novaz#0862 (Me) will allow me to send anything
-    const regex = /^https:\/\/docs.google.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)\/?/;
-    test = regex.test(interaction.options.getString('link'))
-    console.log(`regex.text(link) = ${test}`);
-    return test;
+  if (interaction.user.id == 153284216228937728) return true; // Check if Nexus Novaz#0862 (Me) will allow me to send anything
+  const regex =
+    /^https:\/\/docs.google.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)\/?/;
+  test = regex.test(interaction.options.getString("link"));
+  console.log(`regex.text(link) = ${test}`);
+  return test;
 }
 
 async function getQuizQuestions(spreadsheetId) {
-    const sheets = google.sheets({
-      version: 'v4',
-      auth: googleAPIKey
-    });
-  
-    const range = "Sheet1!A1:A51";
-  
-    return new Promise((resolve, reject) => {
-      sheets.spreadsheets.values.get({
+  const sheets = google.sheets({
+    version: "v4",
+    auth: googleAPIKey,
+  });
+
+  const range = "Sheet1!A1:A51";
+
+  return new Promise((resolve, reject) => {
+    sheets.spreadsheets.values.get(
+      {
         spreadsheetId,
-        range
-      }, (err, res) => {
+        range,
+      },
+      (err, res) => {
         if (err) {
           console.error(`[ERROR] ${err}`);
           reject(err);
         }
-  
+
         const rows = res.data.values;
-  
+        
         if (rows.length) {
           resolve(rows);
         } else {
-          console.log('No data found.');
-          reject(new Error('No data found.'));
+          console.log("No data found.");
+          reject(new Error("No data found."));
         }
-      });
-    });
-  }
-  
+      }
+    );
+  });
+}
 
-module.exports = {getSheetId, getSheetName, getNumberOfQuestions, checkLinkValid, getQuizQuestions};
+module.exports = {
+  getSheetId,
+  getSheetName,
+  getNumberOfQuestions,
+  checkLinkValid,
+  getQuizQuestions,
+};

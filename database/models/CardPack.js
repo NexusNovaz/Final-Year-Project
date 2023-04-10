@@ -9,7 +9,7 @@ const cardpackSchema = new Schema({
   nameOfPack: String,
   googleSheetsId: String,
   numOfQuestions: Number,
-  enabledIn: { 
+  enabledFor: { 
     type: [String], default: []
   },
   meta: {

@@ -1,0 +1,26 @@
+const { SlashCommandBuilder} = require('discord.js');
+const CardPack = require('../../database/models/CardPack.js');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('enabled_quizzes')
+        .setDescription('Get a list of all the quizzes you have enabled'),
+    async execute(interaction) {
+        await interaction.deferReply({ ephemeral: true });
+        try {
+            const matchingPack = await CardPack.find({enabledFor: interaction.user.id});
+            const embed = new EmbedBuilder()
+            .setColor(0x14cf03)
+            .setTitle(`List of Enabled Quizzes for ${interaction.user.tag}`)
+            .setDescription("Heres a list of quizzes you have enabled:");
+            for (let i = 0; i < matchingPack.length; i++) {
+                embed.addFields({name: `Quiz ${i+1}`, value: `${matchingPack[i].nameOfPack}`});
+            }
+            await interaction.editReply({embeds: [embed]});
+        } catch (err) {
+            console.error(`[ERROR] ${err}`);
+            interaction.editReply('There was an error performing this command, please contact `Nexus Novaz#0862`');
+            return -1;
+        }
+    }
+}

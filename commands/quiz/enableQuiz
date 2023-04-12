@@ -1,5 +1,6 @@
 const { SlashCommandBuilder} = require('discord.js');
 const CardPack = require('../../database/models/CardPack.js');
+const {getSheetName} = require('../../utility/spreadsheets.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,7 +17,7 @@ module.exports = {
         try {
             
             await CardPack.updateOne({googleSheetsId: interaction.options.getString('quiz_id')}, {$addToSet: {enabledFor: interaction.user.id}});
-            await interaction.editReply(`You have enabled ${await CardPack.find({googleSheetsId: interaction.options.getString('quiz_id')})} for ${interaction.user.tag} (${interaction.user.id})}`);
+            await interaction.editReply(`You have enabled ${await getSheetName(interaction.options.getString('quiz_id'))} for ${interaction.user.tag} (${interaction.user.id})}`);
 
         } catch (err) {
             console.error(`[ERROR] (enableQuiz.js) ${err}`);

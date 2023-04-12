@@ -1,7 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder} = require('discord.js');
-const mongoose = require('../../database/index.js');
 const CardPack = require('../../database/models/CardPack.js');
-const discord_token = token = require('../../config.json')
 
 module.exports = {
     data: new SlashCommandBuilder()

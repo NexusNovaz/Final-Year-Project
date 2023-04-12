@@ -21,28 +21,18 @@ for (const folder of commandFolders) {
 }
 
 // Construct and prepare an instance of the REST module
-const rest = new REST({ version: '10' }).setToken(token);
+const rest = new REST().setToken(token);
 
 // and deploy your commands!
 (async () => {
 	try {
-		console.log(`Started refreshing ${commands.toString}} application (/) commands.`);
+		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
 			Routes.applicationGuildCommands(clientId, guildId),
 			{ body: commands },
 		);
-
-		// The put method is used to fully refresh all commands in the guild with the current set
-		// rest.delete(Routes.applicationGuildCommand(clientId, guildId, '1093616206692491325'))
-		// 	.then(() => console.log('Successfully deleted guild command'))
-		// 	.catch(console.error);
-
-		// // for global commands
-		// rest.delete(Routes.applicationCommand(clientId, '1093616206692491325'))
-		// 	.then(() => console.log('Successfully deleted application command'))
-		// 	.catch(console.error);
 
 		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
 	} catch (error) {

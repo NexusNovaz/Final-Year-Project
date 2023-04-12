@@ -10,13 +10,14 @@ async function getSheetsInfo(interaction) {
     const sheetId = await getSheetId(interaction);
 
     const sheetName = await getSheetName(sheetId);
-    const numberOfQuestions = getNumberOfQuestions(sheetId);
+    const numberOfQuestions = await getNumberOfQuestions(sheetId);
 
     return {sheetId, sheetName, numberOfQuestions};
 }
 
 async function addRecordToDb(interaction) {
     const {sheetId, sheetName, numberOfQuestions} = await getSheetsInfo(interaction);
+    console.log(`Sheet ID: ${sheetId}, Sheet Name: ${sheetName}, Number of Questions: ${numberOfQuestions}`);
     const newCard = new CardPack({
         userInfo: { discordId: `${interaction.user.id}`, discordTag: `${interaction.user.tag}` },
         nameOfPack: sheetName,
@@ -49,8 +50,14 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
         try {
             if (checkLinkValid(interaction) != false) {
-                await addRecordToDb(interaction);
-                await interaction.editReply('Added to DB');
+                checkIfAlreadyExists = await CardPack.find({googleSheetsId: await getSheetId(interaction)});
+                if (checkIfAlreadyExists.length > 0) {
+                    await interaction.editReply('This quiz already exists in the database.');
+                    return;
+                } else {
+                    await addRecordToDb(interaction);
+                    await interaction.editReply('Added to DB');
+                }
             } else {
                 await interaction.editReply('Invalid link. Please make sure it is the full link. e.g. https://docs.google.com/spreadsheets/d/12fesLNW3vFz48_1YK8nWBM-Ink-yGDc9C6XzWh9hCTQ/edit#gid=0');
             }

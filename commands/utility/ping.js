@@ -1,7 +1,11 @@
 const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-	cooldown: 5,
+	info: {
+		name: 'ping',
+		description: 'Replies with Pong!',
+		usage: '/ping',
+	},
 	data: new SlashCommandBuilder()
 		.setName('ping')
 		.setDescription('Replies with Pong!'),

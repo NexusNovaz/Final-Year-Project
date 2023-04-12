@@ -5,7 +5,8 @@ const {
     getSheetName,
     getNumberOfQuestions,
     checkLinkValid,
-    getQuizQuestions
+    getQuizQuestions,
+    getEnabledQuizzes,
 } = require('../../utility/spreadsheets.js');
 
 module.exports = {
@@ -17,7 +18,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('quiz')
         .setDescription('Get information on quizzes and add a quiz')
-        .addSubcommand(subcommand =>
+        .addSubcommand(subcommand => // enable
             subcommand
                 .setName('enable')
                 .setDescription('Enable a Quiz')
@@ -28,7 +29,7 @@ module.exports = {
                         .setRequired(true)
                 )
         )
-        .addSubcommand(subcommand =>
+        .addSubcommand(subcommand => // disable
             subcommand
                 .setName('disable')
                 .setDescription('Disable a Quiz')
@@ -39,7 +40,7 @@ module.exports = {
                         .setRequired(true)
                 )
         )
-        .addSubcommand(subcommand =>
+        .addSubcommand(subcommand => // add
             subcommand
                 .setName('add')
                 .setDescription('Add a Quiz')
@@ -50,17 +51,22 @@ module.exports = {
                         .setRequired(true)
                 )
         )
+        .addSubcommand(subcommand => // get question
+            subcommand
+                .setName('get_question')
+                .setDescription('Get a question from your enabled packs')
+        )
         // Make a sub command group for list. list will have the following subcommands. list quizzes and list questions
-        .addSubcommandGroup(subcommandGroup =>
+        .addSubcommandGroup(subcommandGroup => // list group
             subcommandGroup
                 .setName('list')
                 .setDescription('List quizzes and questions')
-                .addSubcommand(subcommand =>
+                .addSubcommand(subcommand => // quizzes
                     subcommand
                         .setName('quizzes')
                         .setDescription('List all quizzes')
                 )
-                .addSubcommand(subcommand =>
+                .addSubcommand(subcommand => // questions
                     subcommand
                         .setName('questions')
                         .setDescription('List all questions')
@@ -85,8 +91,7 @@ module.exports = {
                     await CardPack.updateOne({googleSheetsId: interaction.options.getString('quiz_id')}, {$addToSet: {enabledFor: interaction.user.id}});
                     await interaction.editReply(`You have enabled ${await getSheetName(interaction.options.getString('quiz_id'))} for ${interaction.user.tag} (${interaction.user.id})}`);
                 }
-            } 
-            
+            }
             else if (interaction.options.getSubcommand() === 'disable') {
                 // Check if the quiz is enabled for the discord user
                 if (!await CardPack.findOne({googleSheetsId: interaction.options.getString('quiz_id'), enabledFor: interaction.user.id})) {
@@ -109,21 +114,44 @@ module.exports = {
                     return;
                 }
                 // Get the name of the quiz
-                const nameOfPack = await getSheetName(await getSheetId(interaction));
-                // Get the number of questions in the quiz
-                const numberOfQuestions = await getNumberOfQuestions(await getSheetId(interaction));
-                // Create a new card pack
-                const newCardPack = new CardPack({
-                    nameOfPack: nameOfPack,
-                    googleSheetsId: await getSheetId(interaction),
-                    numberOfQuestions: numberOfQuestions,
-                    userInfo: {
-                        discordId: `${interaction.user.id}`, discordTag: `${interaction.user.tag}`
-                    }
-                });
-                // Save the new card pack
-                await newCardPack.save();
+                try {
+                    const nameOfPack = await getSheetName(await getSheetId(interaction));
+                    // Get the number of questions in the quiz
+                    const numberOfQuestions = await getNumberOfQuestions(await getSheetId(interaction));
+                    // Create a new card pack
+                    const newCardPack = new CardPack({
+                        nameOfPack: nameOfPack,
+                        googleSheetsId: await getSheetId(interaction),
+                        numberOfQuestions: numberOfQuestions,
+                        userInfo: {
+                            discordId: `${interaction.user.id}`, discordTag: `${interaction.user.tag}`
+                        }
+                    });
+                    // Save the new card pack
+                    await newCardPack.save();
+                    await interaction.editReply('Saved Successfully. Do /quiz list quizzes to view it');
+                } catch (error) {
+                    await interaction.editReply('Something failed. Have you made the google sheets link publically accessable?');
+                    console.error(error);
+                }
 
+            }
+            else if (interaction.options.getSubcommand() === 'get_question') {
+                const enabledQuizzes = await getEnabledQuizzes(interaction);
+                if (!enabledQuizzes) {
+                    interaction.editReply('You have no enabled quizzes! Run `/quiz list quizzes` to see available quizzes then `/quiz enable <quiz_id>` to enable one!')
+                    return;
+                } else {
+                    const questions = []
+                    console.log(`enabledQuizzes = ${enabledQuizzes}`);
+                    enabledQuizzes.forEach(async(sheetId) => {
+                        const questionPack = await getQuizQuestions(sheetId.googleSheetsId);
+                        questions.push(questionPack);
+                        console.log(`questions = ${questions}`);
+                    })
+                    // console.log(`questionPool = ${questionPool}`);
+                    interaction.editReply('In Testing...');
+                }
             }
             else if (interaction.options.getSubcommandGroup() === 'list') {
                 if (interaction.options.getSubcommand() === 'quizzes') {

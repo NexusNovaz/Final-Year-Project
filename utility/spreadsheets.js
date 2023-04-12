@@ -1,6 +1,7 @@
 const { ModalSubmitFields } = require("discord.js");
 const { googleAPIKey } = require("../config.json");
 const { google } = require("googleapis");
+const CardPack = require("../database/models/CardPack");
 
 async function getSheetId(interaction) {
   const regex = /\/d\/([a-zA-Z0-9-_]+)\//;
@@ -72,7 +73,8 @@ async function getQuizQuestions(spreadsheetId) {
     auth: googleAPIKey,
   });
 
-  const range = "Sheet1!A1:A51";
+  const range = "Sheet1!A2:A51";
+
 
   return new Promise((resolve, reject) => {
     sheets.spreadsheets.values.get(
@@ -99,10 +101,25 @@ async function getQuizQuestions(spreadsheetId) {
   });
 }
 
+async function getEnabledQuizzes(interaction) {
+  const enabledPacks = await CardPack.find({"enabledFor": interaction.user.id}, {googleSheetsId: 1, _id: 0});
+  console.log(enabledPacks);
+  return enabledPacks;
+}
+
+async function getQuestionAnswer(interaction) {
+  const enabledPacks = await getEnabledQuizzes(interaction);
+  enabledQuizzes.forEach(async(sheetId) => {
+    const questionPack = await getQuizQuestions(sheetId.googleSheetsId);
+    
+})
+}
+
 module.exports = {
   getSheetId,
   getSheetName,
   getNumberOfQuestions,
   checkLinkValid,
   getQuizQuestions,
+  getEnabledQuizzes,
 };

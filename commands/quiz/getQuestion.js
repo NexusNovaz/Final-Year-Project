@@ -1,13 +1,14 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const { getQuizInformation } = require("../../utility/spreadsheets");
+const { getEnabledQuizzes, getQuizInformation, checkQuizIdValid } = require("../../utility/spreadsheets");
 
 var question = [];
+const questionEmbed = new EmbedBuilder()
 
 module.exports = {
     info: {
         name: "get_question",
         description: "Get a question from your enabled packs or a specific pack",
-        usage: "/get_question <command>",
+        usage: "/get_question <quiz id>",
     },
     data: new SlashCommandBuilder()
         .setName("get_question")
@@ -20,15 +21,20 @@ module.exports = {
         ),
     async checkAnswer(interaction) {
         if (interaction.customId == question.correct_answer) {
-            interaction.update({content: `Correct Answer!`, embeds: [], components: [] });
+            questionEmbed.setColor(0x00ff00);
+            interaction.update({content: `Correct Answer!`, embeds: [questionEmbed], components: [] });
         } else {
-            console.log(interaction.message.components.data)
-            interaction.update(`Nice try, but its not right. The correct answer was: option ${question.correct_answer}`);
+            questionEmbed.setColor(0xff0000).addFields({name: "Correct Answer:", value: `Option ${question.correct_answer}`})
+            interaction.update({content: `Nice try, but its not right. The correct answer was: option ${question.correct_answer}`, embeds: [questionEmbed], components: []});
         }
     },
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
         const questions = []
+        if (await checkQuizIdValid(interaction.options.getString("quiz_id")) == "invalid_link") {
+            interaction.editReply("Check your spreadsheet id and try again. I dont see any packs with that id.");
+            return;
+        }
         if (interaction.options.getString("quiz_id")) {
             try {
                 const questionsInQuestionPack = await getQuizInformation(interaction.options.getString("quiz_id"));
@@ -45,14 +51,36 @@ module.exports = {
                 }
             } catch (error) {
                 console.error(error)
-                await interaction.editReply('There was an error performing this command, please contact `Nexus Novaz#0862`');
+                await interaction.editReply('There was an error performing this command, please check your input and try again, if it persists, contact `Nexus Novaz#0862`');
+                return -1;
             }
         } else {
             try {
-                // handle no input
-                // get enabled quizzes,
-                // get question from quizzes
-
+                const enabledQuizzes = await getEnabledQuizzes(interaction);
+                if (enabledQuizzes.length == 0) {
+                    await interaction.editReply("You have no quizzes enabled, please enable a quiz or run the command with a quiz id");
+                    return;
+                }
+                try {
+                    const questionObject = []
+                    for (i in enabledQuizzes) {
+                        const questionsInQuestionPack = await getQuizInformation(enabledQuizzes[i].googleSheetsId);
+                        for (sublist in questionsInQuestionPack) {
+                            new_dict = {
+                                "question": questionsInQuestionPack[sublist][0],
+                                "answer1": questionsInQuestionPack[sublist][1],
+                                "answer2": questionsInQuestionPack[sublist][2],
+                                "answer3": questionsInQuestionPack[sublist][3],
+                                "answer4": questionsInQuestionPack[sublist][4],
+                                "correct_answer": questionsInQuestionPack[sublist][5],
+                            }
+                            questions.push(new_dict);
+                        }
+                    }
+                } catch (error) {
+                    console.log(error)
+                    await interaction.editReply('There was an error performing this command, please contact `Nexus Novaz#0862`')
+                }
             } catch (error) {
                 console.error(error);
                 await interaction.editReply('There was an error performing this command, please contact `Nexus Novaz#0862`');
@@ -60,9 +88,9 @@ module.exports = {
             }
         }
         question = questions[Math.floor(Math.random()*questions.length)]
-        const questionEmbed = new EmbedBuilder()
+        questionEmbed
             .setTitle(question.question)
-            .setColor(0x00ff00)
+            .setColor(0xffc524)
             .setTimestamp(Date.now())
             .setFooter({ text: "Revision Bot" });
         const buttonBar = new ActionRowBuilder();

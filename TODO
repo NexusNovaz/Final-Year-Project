@@ -1,5 +1,5 @@
 TODO:
 
-Continue getQuestion.js. Specifically add try{} for no input.
-
-Disable buttons on wrong answer but let user still see options.
+Test all commands
+Do some documentation
+Add some quizzes

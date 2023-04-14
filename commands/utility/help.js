@@ -22,11 +22,6 @@ const rest = new REST().setToken(token);
 const commands = getCommands();
 
 module.exports = {
-  info: {
-    name: "help",
-    description: "Get help on a command or list all commands",
-    usage: "/help <command>",
-  },
   data: new SlashCommandBuilder()
     .setName("help")
     .setDescription("Get help on a command")
@@ -81,5 +76,10 @@ module.exports = {
       );
       return -1;
     }
+  },
+  info: {
+    name: "help",
+    description: "Get help on a command or list all commands",
+    usage: "/help <command>",
   },
 };

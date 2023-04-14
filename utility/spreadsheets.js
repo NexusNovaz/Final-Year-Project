@@ -63,8 +63,30 @@ function checkLinkValid(link) {
   const regex =
     /^https:\/\/docs.google.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)\/?/;
   test = regex.test(link);
-  console.log(`regex.text(link) = ${test}`);
   return test;
+}
+
+async function checkQuizIdValid(quiz_id) {
+  const base = "https://docs.google.com/spreadsheets/d/";
+  const end = "/?";
+  const full_link = base + quiz_id + end;
+
+  try {
+    const sheets = google.sheets({
+      version: "v4",
+      auth: googleAPIKey,
+    });
+  
+    const response = await sheets.spreadsheets.get({
+      spreadsheetId,
+      includeGridData: false,
+    });
+  
+    console.log(response.data.properties.title);
+    return response.data.properties.title;
+  } catch (error) {
+    return "invalid_link";
+  }
 }
 
 async function getQuizQuestions(spreadsheetId) {
@@ -103,7 +125,6 @@ async function getQuizQuestions(spreadsheetId) {
 
 async function getEnabledQuizzes(interaction) {
   const enabledPacks = await CardPack.find({"enabledFor": interaction.user.id}, {googleSheetsId: 1, _id: 0});
-  console.log(enabledPacks);
   return enabledPacks;
 }
 
@@ -150,4 +171,5 @@ module.exports = {
   getQuizQuestions,
   getEnabledQuizzes,
   getQuizInformation,
+  checkQuizIdValid,
 };

@@ -6,8 +6,6 @@ const {
     getNumberOfQuestions,
     checkLinkValid,
     getQuizQuestions,
-    getEnabledQuizzes,
-    getQuestionAnswer,
 } = require('../../utility/spreadsheets.js');
 
 module.exports = {
@@ -125,30 +123,13 @@ module.exports = {
                     });
                     // Save the new card pack
                     await newCardPack.save();
-                    await interaction.editReply('Saved Successfully. Do /quiz list quizzes to view it');
+                    await interaction.editReply('Saved Successfully. Do `/quiz list quizzes` to view it');
                 } catch (error) {
                     await interaction.editReply('Something failed. Have you made the google sheets link publically accessable?');
                     console.error(error);
                 }
 
             }
-            // else if (interaction.options.getSubcommand() === 'get_question') {
-            //     const enabledQuizzes = await getEnabledQuizzes(interaction);
-            //     if (!enabledQuizzes) {
-            //         interaction.editReply('You have no enabled quizzes! Run `/quiz list quizzes` to see available quizzes then `/quiz enable <quiz_id>` to enable one!')
-            //         return;
-            //     } else {
-            //         await getQuestionAnswer();
-            //         const questions = []
-            //         console.log(`enabledQuizzes = ${enabledQuizzes}`);
-            //         enabledQuizzes.forEach(async(sheetId) => {
-            //             const questionPack = await getQuizQuestions(sheetId.googleSheetsId);
-            //             questions.push(questionPack);
-            //         });
-            //         console.log(`questions = ${questions}`);
-            //         interaction.editReply('In Testing...');
-            //     }
-            // }
             else if (interaction.options.getSubcommandGroup() === 'list') {
                 if (interaction.options.getSubcommand() === 'quizzes') {
                     const quizzes = await CardPack.find({}, { userInfo: 1, nameOfPack: 1, googleSheetsId: 1, _id: 0 });
@@ -165,9 +146,8 @@ module.exports = {
                 }
                 
                 else if (interaction.options.getSubcommand() === 'questions') {
-                    const matchingPack = await CardPack.find({googleSheetsId: interaction.options.getString('spreadsheet_id')});
-
-                    const questions = await getQuizQuestions(interaction.options.getString('spreadsheet_id'));
+                    const matchingPack = await CardPack.find({googleSheetsId: interaction.options.getString('quiz_id')});
+                    const questions = await getQuizQuestions(interaction.options.getString('quiz_id'));
 
                     const questionsEmbed = new EmbedBuilder()
                     .setColor(0x14cf03)

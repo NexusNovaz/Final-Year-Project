@@ -7,6 +7,7 @@ const {
     checkLinkValid,
     getQuizQuestions,
     getEnabledQuizzes,
+    getQuestionAnswer,
 } = require('../../utility/spreadsheets.js');
 
 module.exports = {
@@ -50,11 +51,6 @@ module.exports = {
                         .setDescription('The google sheets link of the quiz you want to add')
                         .setRequired(true)
                 )
-        )
-        .addSubcommand(subcommand => // get question
-            subcommand
-                .setName('get_question')
-                .setDescription('Get a question from your enabled packs')
         )
         // Make a sub command group for list. list will have the following subcommands. list quizzes and list questions
         .addSubcommandGroup(subcommandGroup => // list group
@@ -136,23 +132,23 @@ module.exports = {
                 }
 
             }
-            else if (interaction.options.getSubcommand() === 'get_question') {
-                const enabledQuizzes = await getEnabledQuizzes(interaction);
-                if (!enabledQuizzes) {
-                    interaction.editReply('You have no enabled quizzes! Run `/quiz list quizzes` to see available quizzes then `/quiz enable <quiz_id>` to enable one!')
-                    return;
-                } else {
-                    const questions = []
-                    console.log(`enabledQuizzes = ${enabledQuizzes}`);
-                    enabledQuizzes.forEach(async(sheetId) => {
-                        const questionPack = await getQuizQuestions(sheetId.googleSheetsId);
-                        questions.push(questionPack);
-                        console.log(`questions = ${questions}`);
-                    })
-                    // console.log(`questionPool = ${questionPool}`);
-                    interaction.editReply('In Testing...');
-                }
-            }
+            // else if (interaction.options.getSubcommand() === 'get_question') {
+            //     const enabledQuizzes = await getEnabledQuizzes(interaction);
+            //     if (!enabledQuizzes) {
+            //         interaction.editReply('You have no enabled quizzes! Run `/quiz list quizzes` to see available quizzes then `/quiz enable <quiz_id>` to enable one!')
+            //         return;
+            //     } else {
+            //         await getQuestionAnswer();
+            //         const questions = []
+            //         console.log(`enabledQuizzes = ${enabledQuizzes}`);
+            //         enabledQuizzes.forEach(async(sheetId) => {
+            //             const questionPack = await getQuizQuestions(sheetId.googleSheetsId);
+            //             questions.push(questionPack);
+            //         });
+            //         console.log(`questions = ${questions}`);
+            //         interaction.editReply('In Testing...');
+            //     }
+            // }
             else if (interaction.options.getSubcommandGroup() === 'list') {
                 if (interaction.options.getSubcommand() === 'quizzes') {
                     const quizzes = await CardPack.find({}, { userInfo: 1, nameOfPack: 1, googleSheetsId: 1, _id: 0 });

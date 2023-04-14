@@ -107,13 +107,40 @@ async function getEnabledQuizzes(interaction) {
   return enabledPacks;
 }
 
-async function getQuestionAnswer(interaction) {
-  const enabledPacks = await getEnabledQuizzes(interaction);
-  enabledQuizzes.forEach(async(sheetId) => {
-    const questionPack = await getQuizQuestions(sheetId.googleSheetsId);
-    
-})
+async function getQuizInformation(spreadsheetId) {
+  const sheets = google.sheets({
+    version: "v4",
+    auth: googleAPIKey,
+  });
+
+  const range = "Sheet1!A2:F51"; // cells. 
+
+
+  return new Promise((resolve, reject) => {
+    sheets.spreadsheets.values.get(
+      {
+        spreadsheetId,
+        range,
+      },
+      (err, res) => {
+        if (err) {
+          console.error(`[ERROR] ${err}`);
+          reject(err);
+        }
+
+        const rows = res.data.values;
+        
+        if (rows.length) {
+          resolve(rows);
+        } else {
+          console.log("No data found.");
+          reject(new Error("No data found."));
+        }
+      }
+    );
+  });
 }
+
 
 module.exports = {
   getSheetId,
@@ -122,4 +149,5 @@ module.exports = {
   checkLinkValid,
   getQuizQuestions,
   getEnabledQuizzes,
+  getQuizInformation,
 };

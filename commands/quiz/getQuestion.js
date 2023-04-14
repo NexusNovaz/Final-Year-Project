@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { getQuizInformation } = require("../../utility/spreadsheets");
 
+var question = [];
 
 module.exports = {
     info: {
@@ -17,9 +18,16 @@ module.exports = {
                 .setDescription('The google sheets id of the pack you want to get a question from')
                 .setRequired(false)
         ),
+    async checkAnswer(interaction) {
+        if (interaction.customId == question.correct_answer) {
+            interaction.update({content: `Correct Answer!`, embeds: [], components: [] });
+        } else {
+            console.log(interaction.message.components.data)
+            interaction.update(`Nice try, but its not right. The correct answer was: option ${question.correct_answer}`);
+        }
+    },
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
-        const questionPacks = []
         const questions = []
         if (interaction.options.getString("quiz_id")) {
             try {
@@ -51,7 +59,7 @@ module.exports = {
 
             }
         }
-        const question = questions[Math.floor(Math.random()*questions.length)]
+        question = questions[Math.floor(Math.random()*questions.length)]
         const questionEmbed = new EmbedBuilder()
             .setTitle(question.question)
             .setColor(0x00ff00)
@@ -79,7 +87,5 @@ module.exports = {
         questionEmbed.setFields(fields);
 
         interaction.editReply({embeds: [questionEmbed], components: [buttonBar]});
-
-        const collector = msg.createMessageComponentCollector({ filter, time: 15000 });
     }
 }

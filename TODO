@@ -1,3 +1,5 @@
 TODO:
 
-Fix getQuestions. Figure out why rows isnt returning or find out what rows is.
+Continue getQuestion.js. Specifically add try{} for no input.
+
+Disable buttons on wrong answer but let user still see options.

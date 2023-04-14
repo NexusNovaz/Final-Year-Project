@@ -1,10 +1,11 @@
 const { Events, InteractionType, ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { checkAnswer } = require('../commands/quiz/getQuestion');
 
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
 		if (interaction.isButton()) {
-			console.log(interaction);
+			checkAnswer(interaction);
 		}
 		if (!interaction.isChatInputCommand()) return;
 

@@ -82,7 +82,6 @@ async function checkQuizIdValid(quiz_id) {
       includeGridData: false,
     });
   
-    console.log(response.data.properties.title);
     return response.data.properties.title;
   } catch (error) {
     return "invalid_link";

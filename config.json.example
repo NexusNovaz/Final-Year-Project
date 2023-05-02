@@ -1,7 +1,7 @@
 {
-    "token": "DISCORD_BOT_TOKEN",
-    "clientId": "DISCORD_CLIENT_ID",
+	"token": "DISCORD_BOT_TOKEN",
+	"clientId": "DISCORD_CLIENT_ID",
 	"guildId": "GUILD_ID",
-    "mongoDBConnectionURI": "MONGODB_CONNECTING_URL",
-    "googleAPIKey": "GOOGLE_API_KEY"
+	"mongoDBConnectionURI": "MONGODB_CONNECTING_URL",
+	"googleAPIKey": "GOOGLE_API_KEY"
 }

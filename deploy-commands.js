@@ -1,3 +1,5 @@
+// This file was taken and adapted from https://discordjs.guide/creating-your-bot/command-deployment.html#command-registration 
+
 const { REST, Routes } = require('discord.js');
 const { clientId, guildId, token } = require('./config.json');
 const fs = require('node:fs');
